@@ -150,7 +150,7 @@ IME/
 └── Tools/
     ├── DataPipeline/
     │   └── build_lexicon.py        # 詞庫下載與二進位編譯工具
-    ├── generate_icons.swift        # 選單列「ㄅ」圖標與 AppIcon 動態生成腳本
+    ├── generate_icons.swift        # 選單列「好」圖標與 AppIcon 動態生成腳本
     ├── package_ime.sh              # PKG 自動化封裝與註冊腳本
     ├── pkg_scripts/                # PKG 安裝前後註冊腳本
     └── uninstall.sh                # 乾淨卸載工具
