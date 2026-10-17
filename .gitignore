@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Xcode & Swift Package Manager
+.build/
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+*.xcuserstate
+
+# Project Build & Packaging Outputs
+build/
+dist/
+
+# Data Pipeline Cache
+Tools/DataPipeline/cache/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+
+# Temporary & Backup Files
+*.bak
+*~
+*.swp

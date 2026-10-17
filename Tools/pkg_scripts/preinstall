@@ -1,0 +1,22 @@
+#!/bin/bash
+# ==============================================================================
+# 好注音 pkg preinstall（以 root 執行）
+# 目的：安裝前清除所有舊複本，確保系統上永遠只有一份 HaoZhuyin.app。
+# ==============================================================================
+APP_NAME="HaoZhuyin"
+TARGET_VOLUME="${3:-/}"
+TARGET_VOLUME="${TARGET_VOLUME%/}"
+
+# 1. 結束執行中的輸入法程序（避免檔案替換時被系統喚醒而載入半套檔案）
+pkill -9 -x "$APP_NAME" 2>/dev/null || true
+
+# 2. 移除舊的全域複本（不與新版混合覆蓋，避免殘留過期資源）
+rm -rf "$TARGET_VOLUME/Library/Input Methods/$APP_NAME.app" 2>/dev/null || true
+
+# 3. 移除所有使用者目錄下的複本（單一目錄原則：pkg 一律安裝於 /Library/Input Methods）
+for home in /Users/*; do
+    [ -d "$home/Library/Input Methods/$APP_NAME.app" ] || continue
+    rm -rf "$home/Library/Input Methods/$APP_NAME.app" 2>/dev/null || true
+done
+
+exit 0

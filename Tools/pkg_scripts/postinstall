@@ -1,0 +1,54 @@
+#!/bin/bash
+# ==============================================================================
+# 好注音 pkg postinstall（以 root 執行）
+# 目的：在「目前登入的使用者」環境中完成 LaunchServices / TIS 註冊。
+#       LaunchServices 資料庫與輸入來源設定皆為「每位使用者」各自一份，
+#       若以 root 身分註冊，實際登入的使用者看不到 → 設定中不出現。
+# ==============================================================================
+APP_NAME="HaoZhuyin"
+TARGET_VOLUME="${3:-/}"
+TARGET_VOLUME="${TARGET_VOLUME%/}"
+APP_PATH="$TARGET_VOLUME/Library/Input Methods/$APP_NAME.app"
+LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister"
+
+if [ ! -d "$APP_PATH" ]; then
+    echo "[HaoZhuyin] 錯誤：找不到 $APP_PATH" >&2
+    exit 1
+fi
+
+# 正規化權限並移除隔離屬性（避免 Gatekeeper 阻擋輸入法載入）
+chown -R root:wheel "$APP_PATH" 2>/dev/null || true
+chmod -R go-w "$APP_PATH" 2>/dev/null || true
+xattr -dr com.apple.quarantine "$APP_PATH" 2>/dev/null || true
+
+CONSOLE_USER="$(stat -f%Su /dev/console 2>/dev/null)"
+if [ -z "$CONSOLE_USER" ] || [ "$CONSOLE_USER" = "root" ] || [ "$CONSOLE_USER" = "loginwindow" ]; then
+    echo "[HaoZhuyin] 目前無登入使用者，將於下次登入時由系統自動載入。"
+    exit 0
+fi
+CONSOLE_UID="$(id -u "$CONSOLE_USER")"
+
+as_user() {
+    launchctl asuser "$CONSOLE_UID" sudo -u "$CONSOLE_USER" "$@"
+}
+
+# 1. 從使用者的 LaunchServices 資料庫註銷所有「非安裝路徑」的殘留複本
+#    （build/、dmg 掛載點、舊的使用者目錄等），這是設定中重複出現的主因。
+as_user "$LSREGISTER" -dump 2>/dev/null \
+    | sed -n 's/^path:[[:space:]]*\(.*'"$APP_NAME"'\.app\) (0x[0-9a-f]*)$/\1/p' \
+    | sort -u \
+    | while IFS= read -r p; do
+        [ "$p" = "$APP_PATH" ] && continue
+        as_user "$LSREGISTER" -u "$p" 2>/dev/null || true
+    done
+
+# 2. 註冊正式安裝路徑
+as_user "$LSREGISTER" -f "$APP_PATH" 2>/dev/null || true
+
+# 3. 由 App 本身執行 TIS 註冊並啟用（冪等，已啟用者不重複加入）
+as_user "$APP_PATH/Contents/MacOS/$APP_NAME" --register || true
+
+# 4. 刷新輸入法選單
+as_user killall TextInputMenuAgent 2>/dev/null || true
+
+exit 0
