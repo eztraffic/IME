@@ -42,7 +42,7 @@
 ## 📦 安裝說明
 
 ### 雙擊 PKG 安裝（推薦）
-1. 至 [Releases]([https://github.com/](https://github.com/eztraffic/IME/releases/tag/v1.0.0)) 下載最新版 `HaoZhuyin-Installer.pkg`（或自行建置）。
+1. 至 [Releases](https://github.com/eztraffic/IME/releases/tag/v1.0.0) 下載最新版 `HaoZhuyin-Installer.pkg`（或自行建置）。
 2. 雙擊執行安裝程式，依指示完成安裝。
 3. 前往 macOS **「系統設定」>「鍵盤」>「文字輸入」>「輸入方式」>「編輯…」**，點選 **「+」**，於「繁體中文」中新增 **「好注音」**。
 4. 切換為「好注音」即可開始打字！
